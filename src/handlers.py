@@ -7,6 +7,9 @@ from db.logic import Database
 import requests as req
 import json
 import settings
+import re
+
+cleanre = re.compile('<.*?>')
 
 description = req.get("https://api.hh.ru/dictionaries").json()
 
@@ -161,7 +164,7 @@ def vacancy_handler(call):
 
     output = f"""{vacancy["name"]}
     Описание:
-    {description}
+    {re.sub(cleanre, '', description)}
     Зарплата: {salary}
     """
     keyboard = inl_Keyboard()
