@@ -25,7 +25,7 @@ class Search:
         response = req.get(self.url, params=params)
         if response.status_code == 200:
             self.counter += 5
-            res_data = response.json()["items"][: self.counter]
+            res_data = response.json()["items"][self.counter-5:self.counter]
             return {
                 "id": res_data["id"] if res_data["id"] else "",
                 "name": res_data["name"] if res_data["name"] else "",
@@ -34,7 +34,7 @@ class Search:
             }
         return {"error": "Something went wrong"}
 
-    def get_vacancie(self, vacancy_id: int) -> dict:
+    def get_vacancy(self, vacancy_id: int) -> dict:
         response = req.get(f"{self.url}/{vacancy_id}")
         if response.status_code == 200:
             res_data = response.json()
