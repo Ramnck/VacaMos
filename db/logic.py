@@ -37,7 +37,6 @@ class Database(CoreDatabase):
         with self.session as session:
             user = session.query(User).get(user_id)
             return {
-                "text": user.search_text,
                 "schedule": user.schedule,
                 "area": user.area,
                 "salary": user.salary,

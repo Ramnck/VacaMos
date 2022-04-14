@@ -14,7 +14,6 @@ class User(Base):
     __tablename__ = "Users"
 
     id = Column(Integer, primary_key=True)
-    search_text = Column(String)
     schedule = Column(String)
     area = Column(Integer)
     salary = Column(Integer)
