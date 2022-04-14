@@ -27,7 +27,6 @@ class Search:
         params.update(filtered)
         response = req.get(self.url, params=params)
         if response.status_code == 200:
-            print('happend!!')
             self.counter += 5
             vacancies = response.json()["items"][self.counter-5:self.counter]
             result = []
@@ -39,8 +38,6 @@ class Search:
                 "salary": vacancy["salary"] if vacancy["salary"] else {},
             })
             return result 
-        print('LOX')
-        
         return {"error": "Something went wrong"}
 
     def get_vacancy(self, vacancy_id: int) -> dict:
