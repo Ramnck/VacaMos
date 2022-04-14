@@ -1,7 +1,7 @@
 from typing import Any
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, Session
-from models import User, Base
+from db.models import User, Base
 
 
 class CoreDatabase:
