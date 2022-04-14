@@ -38,8 +38,6 @@ def find_handler(message : message.Message):
     for vacancy in vacancies:
         keyboard.add(inl_Button(text=vacancy["name"], callback_data=vacancy["id"]))
     bot.send_message(message.chat.id, "Найденные вакансии:", reply_markup=keyboard)
-    # pass
-    # Получаю вакансии и принтую прям тут 
 
 def parameter_menu(message):
     bot.delete_message(message.chat.id, message.id)
@@ -71,7 +69,6 @@ def salary_f(call):
     keyboard.add(inl_Button(text="Назад", callback_data="back_menu"))
     bot.send_message(call.message.chat.id, "Укажите примерную зарплату в тысячах", reply_markup=keyboard)
     bot.register_next_step_handler(call.message, salary_value)
-
 
 def salary_value(message):
     bot.delete_message(message.chat.id, message.id-1)
@@ -169,7 +166,7 @@ def vacancy_handler(call):
     """
     keyboard = inl_Keyboard()
     keyboard.add(inl_Button("Вакансия", url=vacancy["url"]))
-    bot.send_message(call.message.chat.id, output)
+    bot.send_message(call.message.chat.id, output, reply_markup=keyboard)
 
 @bot.message_handler(commands=["start"])
 def welcome_handler(message):
