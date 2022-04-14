@@ -22,6 +22,9 @@ class Search:
             "salary": salary,
             "only_with_salary": only_with_salary,
         }
+        filtered = {k: v for k, v in params.items() if v is not None}
+        params.clear()
+        params.update(filtered)
         response = req.get(self.url, params=params)
         if response.status_code == 200:
             self.counter += 5
