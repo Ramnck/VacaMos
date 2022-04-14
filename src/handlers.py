@@ -17,7 +17,7 @@ bot = telebot.TeleBot(settings.SECRET_KEY)
 search = Search()
 db = Database()
 
-users = {}
+# counters = {}
 
 default_params = {"schedule" : "fullDay"}
 schedule_params = [i["id"] for i in description["schedule"]]
@@ -32,15 +32,20 @@ inl_Keyboard = types.InlineKeyboardMarkup
 remove_inline = types.ReplyKeyboardRemove
 
 def find_handler(message : message.Message):
-    # print("Ищу"+message.text)
-    user_params = db.get_params(message.from_user.id)
-    # print(user_params)
+    user_params = db.get_params(message.chat.id)
     vacancies = search.get_vacancies(message.text, **user_params)
-    # print(vacancies)
+    try:
+        bot.send_message(message.chat.id, vacancies["error"])
+        menu(message)
+        return        
+    except Exception:
+        pass
     keyboard = inl_Keyboard()
     for vacancy in vacancies:
         keyboard.add(inl_Button(text=vacancy["name"], callback_data=vacancy["id"]))
-    bot.send_message(message.chat.id, "Найденные вакансии:", reply_markup=keyboard)
+    keyboard.add(inl_Button(text="Ещё", callback_data="more"))
+    keyboard.add(inl_Button(text="Назад", callback_data="back"))
+    bot.send_message(message.chat.id, f"Вакансии по запросу {message.text}:", reply_markup=keyboard)
 
 def parameter_menu(message):
     bot.delete_message(message.chat.id, message.id)
@@ -53,8 +58,6 @@ def parameter_menu(message):
     bot.send_message(message.chat.id, "Параметры поиска:", reply_markup=keyboard)
 
 def find_f(message):
-    if str(message.from_user.id) not in users.keys():
-        users[str(message.chat.id)] = default_params
     bot.send_message(message.chat.id, "Введите название")
     bot.register_next_step_handler(message, find_handler)
 
@@ -143,9 +146,21 @@ def parameter_choose(call):
     functions[call.data](call)
     # bot.send_message(call.message.chat.id, "Введите значение")
 
+@bot.callback_query_handler(func=lambda call: call.data=="more")
+def more(call):
+    bot.delete_message(call.message.chat.id, call.message.id)
+    message = call.message
+    message.text = message.text[20:-1]
+    find_handler(message)
+
+
 @bot.callback_query_handler(func=lambda call: str(call.data).isdigit())
 def vacancy_handler(call):
     vacancy = search.get_vacancy(int(call.data))
+    if "error" in vacancy.keys():
+        bot.send_message(call.message.chat.id, vacancy["error"])
+        menu(call.message)
+        return
     salary = ""
     if "from" in vacancy["salary"].keys():
         salary += "От "
@@ -178,6 +193,13 @@ def welcome_handler(message):
     keyboard = Keyboard(resize_keyboard=True, one_time_keyboard=True)
     keyboard.add(Button("Поиск"),Button("Параметры поиска"))
     bot.send_message(message.chat.id, start_message, parse_mode='html', reply_markup=keyboard)
+
+@bot.message_handler(commands=["menu"])
+def menu(message):
+    menu_keyboard = Keyboard(resize_keyboard=True, one_time_keyboard=True)
+    menu_keyboard.add(Button("Поиск"),Button("Параметры поиска"))
+    bot.delete_message(message.chat.id, message.id)
+    bot.send_message(message.chat.id, "Выберите действие", parse_mode='html', reply_markup=menu_keyboard)
 
 @bot.message_handler(commands=["stop"])
 def stop(message):
